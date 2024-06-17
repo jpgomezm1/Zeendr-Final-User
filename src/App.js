@@ -1,4 +1,4 @@
-import React, { useEffect, useState, createContext, useContext } from 'react';
+import React, { useEffect, useState, createContext, useContext, useCallback } from 'react';
 import axios from 'axios';
 import { BrowserRouter as Router, Route, Routes, useParams, useNavigate } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
@@ -39,7 +39,7 @@ function App() {
     },
   }));
 
-  const updateTheme = (colors) => {
+  const updateTheme = useCallback((colors) => {
     setTheme(createTheme({
       typography: {
         fontFamily: 'Poppins, Arial, sans-serif',
@@ -58,7 +58,7 @@ function App() {
         },
       },
     }));
-  };
+  }, []);
 
   return (
     <ThemeProvider theme={theme}>
@@ -121,7 +121,7 @@ function MainRoutes({ updateTheme }) {
     if (establecimiento) {
       fetchLogoAndBanners();
     }
-  }, [establecimiento]);
+  }, [establecimiento, updateTheme]);
 
   useEffect(() => {
     if (!establecimiento) {

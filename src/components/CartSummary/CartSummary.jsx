@@ -3,7 +3,6 @@ import { useSelector } from 'react-redux';
 import { Box, Typography, Button, Badge, keyframes, useTheme } from '@mui/material';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import { styled } from '@mui/material/styles';
-import { useEstablecimiento } from '../../App';
 
 export const selectTotalItems = (state) => state.cart.items.reduce((total, item) => total + item.quantity, 0);
 export const selectTotalPrice = (state) => state.cart.items.reduce((total, item) => total + item.price * item.quantity, 0);

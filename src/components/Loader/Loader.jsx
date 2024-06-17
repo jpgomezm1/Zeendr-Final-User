@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Typography, CircularProgress } from '@mui/material';
+import { Box } from '@mui/material';
 import matrizLogo from '../../assets/logo33.png';  // Asegúrate de que la ruta al logo sea correcta
 import matrizLogo2 from '../../assets/animacion2.gif';
 
