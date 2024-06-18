@@ -82,6 +82,7 @@ function MainRoutes({ updateTheme }) {
   const [instagramUrl, setInstagramUrl] = useState('');
   const [tiktokUrl, setTiktokUrl] = useState('');
   const [whatsappUrl, setWhatsappUrl] = useState('');
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   const capitalizeWords = (str) => {
@@ -115,11 +116,15 @@ function MainRoutes({ updateTheme }) {
         document.querySelector('meta[name="description"]').setAttribute('content', `Bienvenido a la linea de domicilios de ${capitalizedEstablecimiento}`);
       } catch (error) {
         console.error('Error fetching logo and banners:', error);
+      } finally {
+        setLoading(false);
       }
     };
 
     if (establecimiento) {
       fetchLogoAndBanners();
+    } else {
+      setLoading(false);
     }
   }, [establecimiento, updateTheme]);
 
@@ -128,6 +133,10 @@ function MainRoutes({ updateTheme }) {
       navigate('/'); // Redirigir a la página principal si no hay establecimiento
     }
   }, [establecimiento, navigate]);
+
+  if (loading) {
+    return <Loader />;
+  }
 
   return (
     <EstablecimientoContext.Provider value={{ establecimiento, logoUrl, bannerUrls, establecimientoName, instagramUrl, tiktokUrl, whatsappUrl }}>
@@ -155,6 +164,8 @@ function EstablecimientoWrapper() {
         setHorarios(response.data);
       } catch (error) {
         console.error('Error fetching horarios:', error);
+      } finally {
+        setLoading(false);
       }
     };
 
