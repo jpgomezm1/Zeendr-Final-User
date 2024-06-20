@@ -1,5 +1,4 @@
 import React from 'react';
-import logoCompany from '../../assets/logo33.png'
 import { Box, Typography, Button, Link } from '@mui/material';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
@@ -9,14 +8,14 @@ import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import { useEstablecimiento } from '../../App'; // Importa el contexto
 
 const SuccessPage = () => {
-  const { establecimiento, logoUrl } = useEstablecimiento(); // Obtén la URL del logo del contexto
+  const { establecimiento, logoUrl, whatsappUrl } = useEstablecimiento(); // Obtén la URL del logo del contexto
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { name } = location.state || { name: 'Cliente' };
 
   const whatsappMessage = "Hola, acabo de hacer un pedido en Madriguera y me gustaría obtener más información sobre mi orden. ¡Gracias!";
-  const whatsappNumber = "+573016631906";
+  const whatsappNumber = "+573183351733";
 
   const handleContactSupport = () => {
     const whatsappURL = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(whatsappMessage)}`;
@@ -65,7 +64,7 @@ const SuccessPage = () => {
         <Typography variant="body2" sx={{ color: 'gray' }}>
           Developed by
         </Typography>
-        <img src={logoCompany} alt="Logo de la casa matriz" style={{ width: 100, marginTop: '8px' }} />
+        <img src="https://storage.googleapis.com/comprobantes-madriguera/logo-zeendr.png" alt="Logo de la casa matriz" style={{ width: 100, marginTop: '8px' }} />
       </Box>
     </Box>
   );
