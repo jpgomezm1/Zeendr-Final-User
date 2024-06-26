@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { Box, Typography, Button, IconButton, Grid, Card, CardMedia, TextField, Divider, useTheme  } from '@mui/material';
+import { Box, Typography, Button, IconButton, Grid, Card, CardMedia, TextField, Divider, useTheme } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { removeFromCart, updateQuantity } from '../../redux/cartSlice';
 import CloseIcon from '@mui/icons-material/Close';
@@ -17,12 +17,27 @@ const StyledCard = styled(Card)(({ theme }) => ({
   borderRadius: '12px',
 }));
 
+const formatCurrency = (value) => {
+  return new Intl.NumberFormat('es-CO', {
+    style: 'currency',
+    currency: 'COP',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
+  }).format(value);
+};
+
 const CartPage = () => {
   const { establecimiento } = useEstablecimiento();
   const dispatch = useDispatch();
-  const navigate = useNavigate();  // Utilizamos useNavigate
+  const navigate = useNavigate();
   const cartItems = useSelector((state) => state.cart.items);
   const theme = useTheme();
+
+  useEffect(() => {
+    if (cartItems.length === 0) {
+      navigate(-1);  // Redirige a la ruta anterior
+    }
+  }, [cartItems, navigate]);
 
   const handleRemove = (id) => {
     dispatch(removeFromCart(id));
@@ -51,7 +66,7 @@ const CartPage = () => {
         {cartItems.length > 0 && cartItems.map(item => `${item.quantity} x ${item.name}`).join(', ')}
       </Typography>
       <Typography variant="h5" sx={{ mb: 4, color: theme.palette.primary.main, fontWeight: 'bold' }}>
-        {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(totalPrice)} Total Productos
+        {formatCurrency(totalPrice)} Total Productos
       </Typography>
       <Divider sx={{ mb: 2 }} />
       <Grid container spacing={2}>
@@ -66,7 +81,7 @@ const CartPage = () => {
               />
               <Box sx={{ flex: 1, mx: 2 }}>
                 <Typography variant="h6">{item.name}</Typography>
-                <Typography variant="body1">{new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(item.price)}</Typography>
+                <Typography variant="body1">{formatCurrency(item.price)}</Typography>
                 <TextField
                   type="number"
                   label="Cantidad"

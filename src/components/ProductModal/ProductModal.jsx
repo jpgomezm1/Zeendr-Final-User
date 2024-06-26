@@ -37,10 +37,11 @@ function ProductModal({ product, open, onClose }) {
   const handleAddToOrder = () => {
     const quantityNumber = parseInt(quantity, 10);
     if (!isNaN(quantityNumber) && quantityNumber > 0) {
+      const priceWithDiscount = product.descuento > 0 ? product.precio * (1 - product.descuento / 100) : product.precio;
       dispatch(addToCart({
         id: product.id,
         name: product.nombre,
-        price: product.precio,
+        price: priceWithDiscount,
         image: product.imagen_url,
         quantity: quantityNumber
       }));
@@ -79,9 +80,20 @@ function ProductModal({ product, open, onClose }) {
         <Typography variant="h5" component="h2" sx={{ fontWeight: 'bold', mt: 2 }}>
           {product.nombre}
         </Typography>
-        <Typography variant="h6" sx={{ my: 2, fontWeight: 'medium' }}>
-          {formatCurrency(product.precio)}
-        </Typography>
+        {product.descuento > 0 ? (
+          <>
+            <Typography variant="body1" sx={{ textDecoration: 'line-through' }}>
+              {formatCurrency(product.precio)}
+            </Typography>
+            <Typography variant="body1" sx={{ color: 'red' }}>
+              {formatCurrency(product.precio * (1 - product.descuento / 100))}
+            </Typography>
+          </>
+        ) : (
+          <Typography variant="h6" sx={{ my: 2, fontWeight: 'medium' }}>
+            {formatCurrency(product.precio)}
+          </Typography>
+        )}
         <Typography variant="overline" display="block" sx={{ mb: 1, fontWeight: 'bold' }}>
           Descripción
         </Typography>

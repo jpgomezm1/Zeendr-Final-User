@@ -7,6 +7,7 @@ import ProductModal from '../../components/ProductModal/ProductModal';
 import Header from '../../components/Header/Header';
 import CartSummary, { selectTotalItems } from '../../components/CartSummary/CartSummary';
 import Footer from '../../components/Footer/Footer'; // Importar el componente Footer
+import OffersSection from './OffersSection';
 import { useSelector } from 'react-redux';
 import { useEstablecimiento } from '../../App'; // Importa el contexto
 import { useNavigate } from 'react-router-dom';
@@ -25,6 +26,26 @@ const CategoryButton = styled(Button)(({ theme }) => ({
   maxWidth: '100%',
   '&:hover': {
     backgroundColor: 'rgba(0, 0, 0, 0.04)',
+  },
+}));
+
+const DiscountBadge = styled(Box)(({ theme }) => ({
+  backgroundColor: 'red',
+  color: 'white',
+  padding: '5px 10px',
+  borderRadius: '10px',
+  zIndex: 1,
+  animation: 'pulse 1.5s infinite',
+  '@keyframes pulse': {
+    '0%': {
+      transform: 'scale(1)',
+    },
+    '50%': {
+      transform: 'scale(1.1)',
+    },
+    '100%': {
+      transform: 'scale(1)',
+    },
   },
 }));
 
@@ -98,6 +119,11 @@ function ProductsPage() {
           {filteredProducts.map(product => (
             <Grid item xs={6} sm={6} key={product.id} onClick={() => handleOpenModal(product)}>
               <Card sx={{ display: 'flex', flexDirection: 'column', height: 250, position: 'relative', overflow: 'hidden' }}>
+                {product.descuento > 0 && (
+                  <DiscountBadge sx={{ position: 'absolute', top: 10, left: 10 }}>
+                    {product.descuento}% OFF
+                  </DiscountBadge>
+                )}
                 <CardMedia
                   component="img"
                   image={product.imagen_url}
@@ -108,9 +134,20 @@ function ProductsPage() {
                   <Typography variant="h6" component="div">
                     {product.nombre}
                   </Typography>
-                  <Typography variant="body1">
-                    {formatCurrency(product.precio)}
-                  </Typography>
+                  {product.descuento > 0 ? (
+                    <>
+                      <Typography variant="body1" sx={{ textDecoration: 'line-through' }}>
+                        {formatCurrency(product.precio)}
+                      </Typography>
+                      <Typography variant="body1">
+                        {formatCurrency(product.precio * (1 - product.descuento / 100))}
+                      </Typography>
+                    </>
+                  ) : (
+                    <Typography variant="body1">
+                      {formatCurrency(product.precio)}
+                    </Typography>
+                  )}
                 </CardContent>
               </Card>
             </Grid>
@@ -141,13 +178,14 @@ function ProductsPage() {
       <Box sx={{ my: 2 }}>
         <img src={bannerUrls[currentBanner]} alt="Special Offer" style={{ width: '100%', borderRadius: '10px' }} />
       </Box>
-      <Box sx={{ overflowX: 'auto', whiteSpace: 'nowrap', mb: 4 }}>
+      <Box sx={{ overflowX: 'auto', whiteSpace: 'nowrap', mb: 2 }}>
         {categories.map((category, index) => (
           <CategoryButton key={index} variant="outlined" sx={{ backgroundColor: theme.palette.primary.main, fontWeight: 'bold', color: theme.palette.custom.light, display: 'inline-block', marginRight: '8px'}} onClick={() => handleCategoryClick(category)}>
             {category}
           </CategoryButton >
         ))}
       </Box>
+      <OffersSection products={products} handleOpenModal={handleOpenModal} />  {/* Nueva sección de ofertas */}
       {selectedCategory === 'Todos' ? categories.filter(c => c !== 'Todos').map(renderCategorySection) : renderCategorySection(selectedCategory)}
       {selectedProduct && (
         <ProductModal
@@ -163,5 +201,6 @@ function ProductsPage() {
 }
 
 export default ProductsPage;
+
 
 

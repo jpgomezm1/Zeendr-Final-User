@@ -66,6 +66,7 @@ const CartSummary = ({ onViewCart }) => {
         justifyContent: 'space-between',
         boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
         borderRadius: '16px',
+        zIndex: 2
       }}
     >
       <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -101,3 +102,5 @@ const CartSummary = ({ onViewCart }) => {
 }
 
 export default CartSummary;
+
+
