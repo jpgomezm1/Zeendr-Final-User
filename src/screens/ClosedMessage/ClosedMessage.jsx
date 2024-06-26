@@ -1,8 +1,9 @@
 import React from 'react';
 import { Typography, Box } from '@mui/material';
-import { styled } from '@mui/material/styles';
+import { styled, keyframes } from '@mui/material/styles';
 import PropTypes from 'prop-types';
 import { useEstablecimiento } from '../../App'; // Importa el contexto
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
 
 const ClosedMessageContainer = styled(Box)({
   display: 'flex',
@@ -22,6 +23,24 @@ const StyledTypography = styled(Typography)({
   marginBottom: '16px',
   fontFamily: 'Poppins, Arial, sans-serif',
 });
+
+const pulse = keyframes`
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+`;
+
+const AnimatedIcon = styled(AccessTimeIcon)(({ theme }) => ({
+  fontSize: '60px',
+  color: 'black',
+  animation: `${pulse} 2s infinite`
+}));
 
 const ClosedMessage = ({ horarios }) => {
   const { logoUrl } = useEstablecimiento(); // Obtén la URL del logo del contexto
@@ -47,9 +66,9 @@ const ClosedMessage = ({ horarios }) => {
       <StyledTypography variant="h4" gutterBottom sx={{ fontWeight: 'bold' }}>
         Estamos cerrados
       </StyledTypography>
-      <StyledTypography variant="body1" sx={{ marginBottom: '24px' }}>
+      {/* <StyledTypography variant="body1" sx={{ marginBottom: '24px' }}>
         Lo sentimos, pero actualmente no estamos tomando pedidos. Por favor, vuelve más tarde.
-      </StyledTypography>
+      </StyledTypography> */}
       <StyledTypography variant="body1" sx={{ marginBottom: '8px' }}>
         Gracias por visitar nuestra tienda.
       </StyledTypography>
@@ -63,6 +82,7 @@ const ClosedMessage = ({ horarios }) => {
           </StyledTypography>
         ))}
       </Box>
+      <AnimatedIcon />
     </ClosedMessageContainer>
   );
 };
