@@ -29,26 +29,6 @@ const CategoryButton = styled(Button)(({ theme }) => ({
   },
 }));
 
-const DiscountBadge = styled(Box)(({ theme }) => ({
-  backgroundColor: 'red',
-  color: 'white',
-  padding: '5px 10px',
-  borderRadius: '10px',
-  zIndex: 1,
-  animation: 'pulse 1.5s infinite',
-  '@keyframes pulse': {
-    '0%': {
-      transform: 'scale(1)',
-    },
-    '50%': {
-      transform: 'scale(1.1)',
-    },
-    '100%': {
-      transform: 'scale(1)',
-    },
-  },
-}));
-
 function ProductsPage() {
   const theme = useTheme();
   const { establecimiento, logoUrl, bannerUrls } = useEstablecimiento(); // Obtén las URLs de los banners del contexto
@@ -120,9 +100,9 @@ function ProductsPage() {
             <Grid item xs={6} sm={6} key={product.id} onClick={() => handleOpenModal(product)}>
               <Card sx={{ display: 'flex', flexDirection: 'column', height: 250, position: 'relative', overflow: 'hidden' }}>
                 {product.descuento > 0 && (
-                  <DiscountBadge sx={{ position: 'absolute', top: 10, left: 10 }}>
+                  <Box sx={{ position: 'absolute', top: 10, left: 10, backgroundColor: 'red', color: 'white', padding: '5px 10px', borderRadius: '10px', zIndex: 1 }}>
                     {product.descuento}% OFF
-                  </DiscountBadge>
+                  </Box>
                 )}
                 <CardMedia
                   component="img"
@@ -201,6 +181,5 @@ function ProductsPage() {
 }
 
 export default ProductsPage;
-
 
 
