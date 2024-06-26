@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { Box, Typography, Button, TextField, FormControl, Paper, Divider, CircularProgress, Backdrop, Select, MenuItem, InputLabel, useTheme, IconButton, InputAdornment } from '@mui/material';
+import { Box, Typography, Button, TextField, FormControl, Paper, Divider, CircularProgress, Backdrop, Select, MenuItem, InputLabel, useTheme, IconButton, InputAdornment, Checkbox, FormControlLabel } from '@mui/material';
 import { CheckCircle, CheckCircleOutline } from '@mui/icons-material';
 import { useSelector, useDispatch } from 'react-redux';
 import { useLoadScript, Autocomplete } from '@react-google-maps/api';
@@ -95,6 +95,17 @@ const CheckoutPage = () => {
       errors.deliveryCost = 'Debe calcular el costo del domicilio';
     }
 
+    if (scheduleOrder) {
+      if (!deliveryDate) {
+        valid = false;
+        errors.deliveryDate = 'La fecha de entrega es requerida';
+      }
+      if (!deliveryTimeRange) {
+        valid = false;
+        errors.deliveryTimeRange = 'El rango de horas es requerido';
+      }
+    }
+
     setErrors(errors);
     return valid;
   };
@@ -113,6 +124,10 @@ const CheckoutPage = () => {
     formData.append('productos', JSON.stringify(cartItems));
     formData.append('metodo_pago', paymentMethod);
     formData.append('costo_domicilio', deliveryCost);
+    if (scheduleOrder) {
+      formData.append('fecha_entrega', deliveryDate);
+      formData.append('rango_horas', deliveryTimeRange);
+    }
     if (receipt) {
       formData.append('comprobante', receipt);
     }
@@ -209,6 +224,11 @@ const CheckoutPage = () => {
     }
   }, [establecimiento]);
 
+  const [scheduleOrder, setScheduleOrder] = useState(false);
+  const [deliveryDate, setDeliveryDate] = useState('');
+  const [deliveryTimeRange, setDeliveryTimeRange] = useState('');
+  const [timeRanges] = useState(['10:00 - 12:00', '12:00 - 14:00', '14:00 - 16:00', '16:00 - 18:00']);
+
   return (
     <Paper elevation={0} sx={{ p: 4, maxWidth: 600, mx: 'auto', mt: 4, borderRadius: 2 }}>
       <Typography variant="h5" sx={{ mb: 2 }}>
@@ -282,7 +302,6 @@ const CheckoutPage = () => {
             onChange={handlePaymentMethodChange}
             label="Método de Pago"
           >
-            <MenuItem value="Efectivo">Efectivo</MenuItem>
             <MenuItem value="Transferencia">Transferencia</MenuItem>
           </Select>
           {errors.paymentMethod && <Typography variant="body2" color="error">{errors.paymentMethod}</Typography>}
@@ -314,6 +333,44 @@ const CheckoutPage = () => {
             <Typography variant="body2" sx={{ mt: 1 }}>
               {receipt ? receipt.name : 'Por favor, carga el comprobante de pago'}
             </Typography>
+          </Box>
+        )}
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={scheduleOrder}
+              onChange={(e) => setScheduleOrder(e.target.checked)}
+              color="primary"
+            />
+          }
+          label="Deseo programar mi pedido"
+        />
+        {scheduleOrder && (
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <TextField
+              label="Fecha de Entrega"
+              type="date"
+              InputLabelProps={{ shrink: true }}
+              value={deliveryDate}
+              onChange={(e) => setDeliveryDate(e.target.value)}
+              error={!!errors.deliveryDate}
+              helperText={errors.deliveryDate}
+            />
+            <FormControl variant="outlined" error={!!errors.deliveryTimeRange}>
+              <InputLabel>Rango de Horas</InputLabel>
+              <Select
+                value={deliveryTimeRange}
+                onChange={(e) => setDeliveryTimeRange(e.target.value)}
+                label="Rango de Horas"
+              >
+                {timeRanges.map((range) => (
+                  <MenuItem key={range} value={range}>
+                    {range}
+                  </MenuItem>
+                ))}
+              </Select>
+              {errors.deliveryTimeRange && <Typography variant="body2" color="error">{errors.deliveryTimeRange}</Typography>}
+            </FormControl>
           </Box>
         )}
         <Divider sx={{ my: 2 }} />
