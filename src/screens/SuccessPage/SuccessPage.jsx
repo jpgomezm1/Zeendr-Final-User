@@ -6,10 +6,9 @@ import { clearCart } from '../../redux/cartSlice';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline'; // Icono para el mensaje de confirmación
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import { useEstablecimiento } from '../../App'; // Importa el contexto
-import logoZ from '../../assets/logo33.png'
 
 const SuccessPage = () => {
-  const { establecimiento, logoUrl, whatsappUrl } = useEstablecimiento(); // Obtén la URL del logo del contexto
+  const { establecimiento, logoUrl } = useEstablecimiento(); // Obtén la URL del logo del contexto
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -65,7 +64,7 @@ const SuccessPage = () => {
         <Typography variant="body2" sx={{ color: 'gray' }}>
           Developed by
         </Typography>
-        <img src={logoZ} alt="Logo Zeendr" style={{ width: 100, marginTop: '8px' }} />
+        <img src="https://storage.googleapis.com/comprobantes-madriguera/logo-zeendr.png" alt="Logo Zeendr" style={{ width: 100, marginTop: '8px' }} />
       </Box>
     </Box>
   );
