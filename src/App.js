@@ -116,8 +116,6 @@ function MainRoutes({ updateTheme }) {
         document.querySelector('meta[name="description"]').setAttribute('content', `Bienvenido a la linea de domicilios de ${capitalizedEstablecimiento}`);
       } catch (error) {
         console.error('Error fetching logo and banners:', error);
-      } finally {
-        setLoading(false);
       }
     };
 
@@ -133,6 +131,29 @@ function MainRoutes({ updateTheme }) {
       navigate('/'); // Redirigir a la página principal si no hay establecimiento
     }
   }, [establecimiento, navigate]);
+
+  useEffect(() => {
+    const minimumLoadingTime = 3000; // 5 segundos
+    const startTime = Date.now();
+
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, minimumLoadingTime);
+
+    const checkLoading = () => {
+      const elapsedTime = Date.now() - startTime;
+      if (elapsedTime >= minimumLoadingTime) {
+        setLoading(false);
+        clearTimeout(timer);
+      }
+    };
+
+    if (!loading) {
+      checkLoading();
+    }
+
+    return () => clearTimeout(timer);
+  }, [loading]);
 
   if (loading) {
     return <Loader />;
@@ -175,7 +196,7 @@ function EstablecimientoWrapper() {
   useEffect(() => {
     const timer = setTimeout(() => {
       setLoading(false);
-    }, 3000);
+    }, 5000);
 
     return () => clearTimeout(timer);
   }, []);
@@ -240,5 +261,4 @@ function EstablecimientoWrapper() {
 }
 
 export default App;
-
 

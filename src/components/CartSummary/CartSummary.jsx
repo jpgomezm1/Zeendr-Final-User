@@ -1,6 +1,6 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { Box, Typography, Button, Badge, keyframes, useTheme } from '@mui/material';
+import { Box, Typography, Button, Badge, keyframes, useTheme, useMediaQuery } from '@mui/material';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import { styled } from '@mui/material/styles';
 
@@ -25,11 +25,13 @@ const StyledBadge = styled(Badge)(({ theme }) => ({
     top: 13,
     border: `2px solid ${theme.palette.background.paper}`,
     padding: '0 4px',
+    fontSize: '1rem', // Ajusta el tamaño del texto en el badge
   },
 }));
 
 const AnimatedIcon = styled(ShoppingCartIcon)(({ theme }) => ({
-  animation: `${bounce} 2s infinite`
+  animation: `${bounce} 2s infinite`,
+  fontSize: '2rem', // Ajusta el tamaño del icono
 }));
 
 const formatCurrency = (value) => {
@@ -45,6 +47,7 @@ const CartSummary = ({ onViewCart }) => {
   const totalItems = useSelector(selectTotalItems);
   const totalPrice = useSelector(selectTotalPrice);
   const theme = useTheme();
+  const isLargeScreen = useMediaQuery(theme.breakpoints.up('md'));
 
   if (totalItems === 0) {
     return null;
@@ -54,13 +57,13 @@ const CartSummary = ({ onViewCart }) => {
     <Box
       sx={{
         position: 'fixed',
-        bottom: 16,
-        left: 16,
-        right: 16,
-        width: 'calc(100% - 32px)',
+        bottom: 15,
+        left: isLargeScreen ? 'calc(50% - 400px)' : 16, // Ajusta la posición en pantallas grandes
+        right: isLargeScreen ? 'calc(50% - 400px)' : 16, // Ajusta la posición en pantallas grandes
+        width: isLargeScreen ? '800px' : 'calc(100% - 32px)', // Ajusta el ancho en pantallas grandes
         bgcolor: '#f3f0e9',
         color: '#333',
-        p: 2,
+        p: 3,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
@@ -74,10 +77,10 @@ const CartSummary = ({ onViewCart }) => {
           <AnimatedIcon />
         </StyledBadge>
         <Box sx={{ ml: 4 }}>
-          <Typography variant="body2" sx={{ color: '#555', fontWeight: 'bold' }}>
+          <Typography variant="body1" sx={{ color: '#555', fontWeight: 'bold', fontSize: isLargeScreen ? '1.5rem' : '1rem' }}>
             Total Pedido
           </Typography>
-          <Typography variant="h6">
+          <Typography variant="h5" sx={{ fontSize: isLargeScreen ? '2.5rem' : '1.5rem' }}>
             {formatCurrency(totalPrice)}
           </Typography>
         </Box>
@@ -87,11 +90,12 @@ const CartSummary = ({ onViewCart }) => {
         sx={{
           bgcolor: theme.palette.primary.main,
           '&:hover': {
-            bgcolor: theme.palette.custom.hoover,
+            bgcolor: theme.palette.custom.hover,
           },
           borderRadius: '20px',
           color: theme.palette.custom.light,
-          
+          fontSize: isLargeScreen ? '1.5rem' : '1rem', // Ajusta el tamaño del texto en el botón
+          padding: isLargeScreen ? '16px 32px' : '8px 16px', // Ajusta el padding en pantallas grandes
         }}
         onClick={onViewCart}
       >
@@ -102,5 +106,3 @@ const CartSummary = ({ onViewCart }) => {
 }
 
 export default CartSummary;
-
-

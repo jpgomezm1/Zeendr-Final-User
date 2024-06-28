@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Box, TextField, Typography, Button, Grid, Card, CardMedia, CardContent, useTheme } from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
+import { Box, Typography, Button, Grid, Card, CardMedia, CardContent, useTheme, useMediaQuery } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import ProductModal from '../../components/ProductModal/ProductModal';
 import Header from '../../components/Header/Header';
@@ -17,7 +16,7 @@ const CategoryButton = styled(Button)(({ theme }) => ({
   borderColor: theme.palette.custom.dark,
   borderWidth: '1px',
   borderStyle: 'solid',
-  borderRadius: '20px',
+  borderRadius: '26px',
   padding: '6px 12px',
   textTransform: 'none',
   whiteSpace: 'nowrap',
@@ -31,6 +30,7 @@ const CategoryButton = styled(Button)(({ theme }) => ({
 
 function ProductsPage() {
   const theme = useTheme();
+  const isLargeScreen = useMediaQuery(theme.breakpoints.up('md')); // Detecta si la pantalla es grande
   const { establecimiento, logoUrl, bannerUrls } = useEstablecimiento(); // Obtén las URLs de los banners del contexto
   const [products, setProducts] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -57,7 +57,7 @@ function ProductsPage() {
   useEffect(() => {
     const bannerInterval = setInterval(() => {
       setCurrentBanner(prevBanner => (prevBanner + 1) % bannerUrls.length);
-    }, 7000); // Cambiar cada 10 segundos
+    }, 7000); // Cambiar cada 7 segundos
 
     return () => clearInterval(bannerInterval);
   }, [bannerUrls.length]);
@@ -92,13 +92,36 @@ function ProductsPage() {
     console.log('Productos filtrados:', filteredProducts);
     return (
       <Box key={category}>
-        <Typography variant="h4" sx={{ mt: 4, mb: 2, color: theme.palette.primary.main, fontWeight: 'bold' }}>
+        <Typography 
+          variant="h4" 
+          sx={{ 
+            mt: 4, 
+            mb: 2, 
+            color: theme.palette.primary.main, 
+            fontWeight: 'bold',
+            fontSize: isLargeScreen ? '2.5rem' : '1.5rem' // Ajusta el tamaño de la fuente en pantallas grandes
+          }}
+        >
           {category}
         </Typography>
         <Grid container spacing={2}>
           {filteredProducts.map(product => (
-            <Grid item xs={6} sm={6} key={product.id} onClick={() => handleOpenModal(product)}>
-              <Card sx={{ display: 'flex', flexDirection: 'column', height: 250, position: 'relative', overflow: 'hidden' }}>
+            <Grid item xs={6} sm={4} md={3} lg={3} key={product.id} onClick={() => handleOpenModal(product)}>
+              <Card 
+                sx={{ 
+                  display: 'flex', 
+                  flexDirection: 'column', 
+                  height: { xs: 250, md: 300, lg: 350 }, // Ajusta la altura de las cards en pantallas grandes
+                  position: 'relative', 
+                  overflow: 'hidden',
+                  transition: 'transform 0.3s, box-shadow 0.3s', // Efecto de transición
+                  '&:hover': {
+                    transform: 'scale(1.05)', // Escala al 105% cuando se pasa el cursor
+                    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.2)', // Sombra más prominente
+                    cursor: 'pointer'
+                  },
+                }}
+              >
                 {product.descuento > 0 && (
                   <Box sx={{ position: 'absolute', top: 10, left: 10, backgroundColor: 'red', color: 'white', padding: '5px 10px', borderRadius: '10px', zIndex: 1 }}>
                     {product.descuento}% OFF
@@ -142,25 +165,27 @@ function ProductsPage() {
   };
 
   return (
-    <Box sx={{ p: 2, pb: totalItems > 0 ? 14 : 2 }}>
-      <Header logo={logoUrl} />
-
-      <TextField 
-        fullWidth 
-        label="Buscar productos" 
-        variant="outlined" 
-        value={searchTerm} 
-        onChange={(e) => setSearchTerm(e.target.value)} 
-        InputProps={{
-          endAdornment: <SearchIcon />
-        }}
-      />
+    <Box sx={{ pt: isLargeScreen ? '120px' : '0', p: 2, pb: totalItems > 0 ? (isLargeScreen ? '170px' : '130px') : 2, maxWidth: { xs: '100%', md: '80%' }, mx: 'auto' }}>
+      <Header logo={logoUrl} searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
       <Box sx={{ my: 2 }}>
         <img src={bannerUrls[currentBanner]} alt="Special Offer" style={{ width: '100%', borderRadius: '10px' }} />
       </Box>
       <Box sx={{ overflowX: 'auto', whiteSpace: 'nowrap', mb: 2 }}>
         {categories.map((category, index) => (
-          <CategoryButton key={index} variant="outlined" sx={{ backgroundColor: theme.palette.primary.main, fontWeight: 'bold', color: theme.palette.custom.light, display: 'inline-block', marginRight: '8px'}} onClick={() => handleCategoryClick(category)}>
+          <CategoryButton 
+            key={index} 
+            variant="outlined" 
+            sx={{ 
+              backgroundColor: theme.palette.primary.main, 
+              fontWeight: 'bold', 
+              color: theme.palette.custom.light, 
+              display: 'inline-block', 
+              marginRight: isLargeScreen ? '16px' : '8px', // Aumenta el espaciado en pantallas grandes
+              fontSize: isLargeScreen ? '1.25rem' : '1rem', // Ajusta el tamaño de la fuente en pantallas grandes
+              padding: isLargeScreen ? '10px 20px' : '6px 12px', // Ajusta el padding en pantallas grandes
+            }} 
+            onClick={() => handleCategoryClick(category)}
+          >
             {category}
           </CategoryButton >
         ))}
@@ -181,5 +206,3 @@ function ProductsPage() {
 }
 
 export default ProductsPage;
-
-
