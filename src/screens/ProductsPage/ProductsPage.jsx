@@ -97,7 +97,7 @@ function ProductsPage() {
           sx={{ 
             mt: 4, 
             mb: 2, 
-            color: theme.palette.primary.main, 
+            color: theme.palette.custom.dark, 
             fontWeight: 'bold',
             fontSize: isLargeScreen ? '2.5rem' : '1.5rem' // Ajusta el tamaño de la fuente en pantallas grandes
           }}
@@ -170,7 +170,7 @@ function ProductsPage() {
       <Box sx={{ my: 2 }}>
         <img src={bannerUrls[currentBanner]} alt="Special Offer" style={{ width: '100%', borderRadius: '10px' }} />
       </Box>
-      <Box sx={{ overflowX: 'auto', whiteSpace: 'nowrap', mb: 2 }}>
+      <Box sx={{ overflowX: 'auto', whiteSpace: 'nowrap', mb: 1 }}>
         {categories.map((category, index) => (
           <CategoryButton 
             key={index} 
@@ -206,3 +206,5 @@ function ProductsPage() {
 }
 
 export default ProductsPage;
+
+

@@ -44,8 +44,25 @@ const OffersSection = ({ products, handleOpenModal }) => {
   const offerProducts = products.filter(product => product.descuento > 0);
 
   return (
-    <Box sx={{ mb: 4, textAlign: 'center' }}>
-      <Box sx={{ display: 'flex', justifyContent: isLargeScreen ? 'center' : 'flex-start', flexWrap: isLargeScreen ? 'wrap' : 'nowrap', overflowX: isLargeScreen ? 'hidden' : 'auto', padding: '16px 0' }}>
+    <Box sx={{ textAlign: 'center', mb: -4 }}>
+      <Box sx={{ 
+        display: 'flex', 
+        justifyContent: 'flex-start', 
+        flexWrap: 'nowrap', 
+        overflowX: 'auto', 
+        padding: '16px 0', 
+        scrollbarWidth: 'thin', // Para Firefox
+        '&::-webkit-scrollbar': {
+          height: '6px', // Para Chrome, Safari y Opera
+        },
+        '&::-webkit-scrollbar-thumb': {
+          backgroundColor: theme.palette.primary.main,
+          borderRadius: '10px',
+        },
+        '&::-webkit-scrollbar-track': {
+          backgroundColor: theme.palette.background.default,
+        },
+      }}>
         {offerProducts.map(product => (
           <Box key={product.id} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative', mt: 2, mb: 2, cursor: 'pointer'}}>
             <OfferCircle onClick={() => handleOpenModal(product)} isLargeScreen={isLargeScreen}>
@@ -68,3 +85,5 @@ const OffersSection = ({ products, handleOpenModal }) => {
 };
 
 export default OffersSection;
+
+
