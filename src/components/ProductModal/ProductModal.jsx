@@ -151,3 +151,5 @@ function ProductModal({ product, open, onClose }) {
 }
 
 export default ProductModal;
+
+
