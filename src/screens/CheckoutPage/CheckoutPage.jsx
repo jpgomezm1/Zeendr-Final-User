@@ -34,6 +34,8 @@ const CheckoutPage = () => {
 
   const [accountNumber, setAccountNumber] = useState('');
   const [qrCodeUrl, setQrCodeUrl] = useState('');
+  const [discountCode, setDiscountCode] = useState(''); // New state for discount code
+  const [discount, setDiscount] = useState(0); // New state for discount value
 
   const totalPrice = cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
 
@@ -110,11 +112,29 @@ const CheckoutPage = () => {
     return valid;
   };
 
+  const validateDiscountCode = async () => {
+    try {
+      const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/cupones_disponibles?establecimiento=${encodeURIComponent(establecimiento)}`);
+      const cupones = response.data;
+      const cupon = cupones.find(c => c.nombre === discountCode);
+
+      if (cupon) {
+        setDiscount((totalPrice * cupon.descuento) / 100); // Calcula el descuento basado en el total de los productos
+        setErrors((prevErrors) => ({ ...prevErrors, discountCode: null }));
+      } else {
+        setDiscount(0);
+        setErrors((prevErrors) => ({ ...prevErrors, discountCode: 'El cupón no es válido o está congelado' }));
+      }
+    } catch (error) {
+      console.error('Error al validar el cupón:', error);
+    }
+  };
+
   const handleSubmit = async () => {
     if (!validateForm()) {
       return;
     }
-
+  
     setIsLoading(true);
     const formData = new FormData();
     formData.append('nombre_completo', name);
@@ -131,14 +151,17 @@ const CheckoutPage = () => {
     if (receipt) {
       formData.append('comprobante', receipt);
     }
-
+    if (discountCode) {
+      formData.append('codigo_descuento', discountCode); // Enviar el código de descuento
+    }
+  
     try {
       const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/pedido?establecimiento=${encodeURIComponent(establecimiento)}`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
       });
-
+  
       if (response.status === 201) {
         dispatch(clearCart());
         navigate(`/${establecimiento}/success`, { state: { name } });
@@ -313,7 +336,7 @@ const CheckoutPage = () => {
             </Typography>
             <img src={qrCodeUrl} alt="QR Code" style={{ width: 200, height: 200 }} />
             <Typography variant="body1" sx={{ mt: 2 }}>
-              Total a pagar: {formatCurrency(totalPrice + deliveryCost)}
+              Total a pagar: {formatCurrency(totalPrice + deliveryCost - discount)}
             </Typography>
             <Typography variant="body1">
               Número de cuenta: {accountNumber}
@@ -335,6 +358,21 @@ const CheckoutPage = () => {
             </Typography>
           </Box>
         )}
+        <TextField
+          label="Cupón de Descuento"
+          variant="outlined"
+          value={discountCode}
+          onChange={(e) => setDiscountCode(e.target.value)}
+          error={!!errors.discountCode}
+          helperText={errors.discountCode}
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                <Button onClick={validateDiscountCode}>Validar</Button>
+              </InputAdornment>
+            ),
+          }}
+        />
         <FormControlLabel
           control={
             <Checkbox
@@ -389,9 +427,15 @@ const CheckoutPage = () => {
             <Typography variant="body1">Domicilio</Typography>
             <Typography variant="body1">{formatCurrency(deliveryCost)}</Typography>
           </Box>
+          {discount > 0 && (
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+              <Typography variant="body1">Cupon</Typography>
+              <Typography variant="body1">-{formatCurrency(discount)}</Typography>
+            </Box>
+          )}
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
             <Typography variant="body1" sx={{ fontWeight: 'bold', color: theme.palette.primary.main }}>Total</Typography>
-            <Typography variant="body1" sx={{ fontWeight: 'bold', color: theme.palette.primary.main }}>{formatCurrency(totalPrice + deliveryCost)}</Typography>
+            <Typography variant="body1" sx={{ fontWeight: 'bold', color: theme.palette.primary.main }}>{formatCurrency(totalPrice + deliveryCost - discount)}</Typography>
           </Box>
         </Box>
         <Button
@@ -429,3 +473,5 @@ const CheckoutPage = () => {
 };
 
 export default CheckoutPage;
+
+

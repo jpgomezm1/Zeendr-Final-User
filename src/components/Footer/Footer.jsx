@@ -6,6 +6,7 @@ import whatsappIcon from '../../assets/wpp.png';
 import tiktokIcon from '../../assets/tiktok.png';
 import { useEstablecimiento } from '../../App'; // Importa el contexto
 import { useParams } from 'react-router-dom';
+ 
 
 import './Footer.css';
 
@@ -20,7 +21,7 @@ const Footer = () => {
   };
 
   const handleZeendrLogoClick = () => {
-    window.open('https://storage.googleapis.com/comprobantes-madriguera/logo-zeendr.png', '_blank');
+    window.open('https://storage.googleapis.com/comprobantes-madriguera/irre-logo.png', '_blank');
   };
 
   const toTitleCase = (str) => {
@@ -69,14 +70,14 @@ const Footer = () => {
           </Box>
         </Grid>
         <Grid item xs={12} md={3}>
-        <Typography variant="h6" sx={{ mb: { xs: 1, md: 2 }, fontSize: { xs: '1.2rem', md: '1.5rem' }, color: '#333' }}>
+        <Typography variant="h6" sx={{  fontSize: { xs: '1.2rem', md: '1.5rem' }, color: '#333' }}>
             Developed by
           </Typography>
           <Box sx={{ cursor: 'pointer', display: 'flex', justifyContent: 'center' }} onClick={handleZeendrLogoClick}>
             <img
-              src="https://storage.googleapis.com/comprobantes-madriguera/logo-zeendr.png"
+              src="https://storage.googleapis.com/comprobantes-madriguera/irre-logo.png"
               alt="Logo Zeendr"
-              style={{ width: '150px', marginBottom: '10px', transition: 'transform 0.3s' }}
+              style={{ width: '250px', transition: 'transform 0.3s' }}
               onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
               onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1.0)'}
             />

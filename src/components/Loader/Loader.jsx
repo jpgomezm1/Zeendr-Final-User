@@ -1,7 +1,6 @@
 import React from 'react';
 import { Box, keyframes } from '@mui/material';
-import matrizLogo from '../../assets/logo33.png';  // Asegúrate de que la ruta al logo sea correcta
-import matrizLogo2 from '../../assets/animacion2.gif';
+import matrizLogo from '../../assets/irre-logo.png'; 
 
 const spin = keyframes`
   0% {
@@ -27,14 +26,8 @@ const bounce = keyframes`
 const Loader = () => {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh', textAlign: 'center', backgroundColor: '#fff' }}>
-      <Box sx={{ animation: `${spin} 2s linear infinite`, mb: 4 }}>
-        <img src={matrizLogo2} alt="Animación de la casa matriz" style={{ width: 100 }} />
-      </Box>
       <Box sx={{ animation: `${bounce} 2s infinite`, mb: 4 }}>
-        <img src={matrizLogo} alt="Logo de la casa matriz" style={{ width: 200 }} />
-      </Box>
-      <Box>
-        <img src={matrizLogo} alt="Logo de la casa matriz" style={{ width: 100, marginTop: '16px', opacity: 0.5 }} />
+        <img src={matrizLogo} alt="Logo de la casa matriz" style={{ width: 500 }} />
       </Box>
     </Box>
   );
