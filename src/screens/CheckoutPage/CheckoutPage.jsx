@@ -432,7 +432,7 @@ const CheckoutPage = () => {
           InputProps={{
             endAdornment: (
               <InputAdornment position="end">
-                <Button onClick={validateDiscountCode}>Validar</Button>
+                <Button onClick={validateDiscountCode} sx={{ color: theme.palette.secondary.main }}>Validar</Button>
               </InputAdornment>
             ),
           }}
