@@ -537,13 +537,13 @@ const CheckoutPage = () => {
           >
             <Typography
               variant="body1"
-              sx={{ fontWeight: 'bold', color: theme.palette.primary.main }}
+              sx={{ fontWeight: 'bold', color: theme.palette.secondary.main }}
             >
               Total
             </Typography>
             <Typography
               variant="body1"
-              sx={{ fontWeight: 'bold', color: theme.palette.primary.main }}
+              sx={{ fontWeight: 'bold', color: theme.palette.secondary.main }}
             >
               {formatCurrency(totalPrice + deliveryCost - discount)}
             </Typography>
@@ -571,8 +571,8 @@ const CheckoutPage = () => {
         <Button
           variant="outlined"
           sx={{
-            borderColor: theme.palette.primary.main,
-            color: theme.palette.primary.main,
+            borderColor: theme.palette.secondary.main,
+            color: theme.palette.secondary.main,
             '&:hover': {
               borderColor: theme.palette.custom.hoover,
               color: theme.palette.custom.hoover,
