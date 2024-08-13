@@ -112,7 +112,7 @@ function MainRoutes({ updateTheme }) {
         });
 
         // Update document title and meta tags
-        document.title = `Domicilios ${capitalizedEstablecimiento}`;
+        document.title = `${capitalizedEstablecimiento}`;
         document.querySelector('meta[name="description"]').setAttribute('content', `Bienvenido a la linea de domicilios de ${capitalizedEstablecimiento}`);
       } catch (error) {
         console.error('Error fetching logo and banners:', error);

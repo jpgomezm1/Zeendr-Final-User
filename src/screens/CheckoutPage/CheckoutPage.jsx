@@ -1,8 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { Box, Typography, Button, TextField, FormControl, Paper, Divider, CircularProgress, Backdrop, Select, MenuItem, InputLabel, useTheme, IconButton, InputAdornment, Checkbox, FormControlLabel } from '@mui/material';
-import { CheckCircle, CheckCircleOutline } from '@mui/icons-material';
+import {
+  Box,
+  Typography,
+  Button,
+  TextField,
+  FormControl,
+  Paper,
+  Divider,
+  CircularProgress,
+  Backdrop,
+  Select,
+  MenuItem,
+  InputLabel,
+  useTheme,
+  InputAdornment,
+  Checkbox,
+  FormControlLabel,
+} from '@mui/material';
+import { CheckCircle } from '@mui/icons-material';
 import { useSelector, useDispatch } from 'react-redux';
 import { useLoadScript, Autocomplete } from '@react-google-maps/api';
 import { clearCart } from '../../redux/cartSlice';
@@ -20,6 +37,8 @@ const CheckoutPage = () => {
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [address, setAddress] = useState('');
+  const [addressDetails, setAddressDetails] = useState('');
+  const [previousAddress, setPreviousAddress] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('');
   const [deliveryCost, setDeliveryCost] = useState(null);
   const [receipt, setReceipt] = useState(null);
@@ -29,15 +48,17 @@ const CheckoutPage = () => {
   const theme = useTheme();
   const [openDialog, setOpenDialog] = useState(false);
   const [fetchedOrder, setFetchedOrder] = useState(null);
-  const [addressConfirmed, setAddressConfirmed] = useState(false);
   const [autocomplete, setAutocomplete] = useState(null);
 
   const [accountNumber, setAccountNumber] = useState('');
   const [qrCodeUrl, setQrCodeUrl] = useState('');
-  const [discountCode, setDiscountCode] = useState(''); // New state for discount code
-  const [discount, setDiscount] = useState(0); // New state for discount value
+  const [discountCode, setDiscountCode] = useState('');
+  const [discount, setDiscount] = useState(0);
 
-  const totalPrice = cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
+  const totalPrice = cartItems.reduce(
+    (total, item) => total + item.price * item.quantity,
+    0
+  );
 
   const { isLoaded } = useLoadScript({
     googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY,
@@ -58,7 +79,7 @@ const CheckoutPage = () => {
       style: 'currency',
       currency: 'COP',
       minimumFractionDigits: 0,
-      maximumFractionDigits: 0
+      maximumFractionDigits: 0,
     }).format(value);
   };
 
@@ -114,16 +135,23 @@ const CheckoutPage = () => {
 
   const validateDiscountCode = async () => {
     try {
-      const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/cupones_disponibles?establecimiento=${encodeURIComponent(establecimiento)}`);
+      const response = await axios.get(
+        `${process.env.REACT_APP_BACKEND_URL}/cupones_disponibles?establecimiento=${encodeURIComponent(
+          establecimiento
+        )}`
+      );
       const cupones = response.data;
-      const cupon = cupones.find(c => c.nombre === discountCode);
+      const cupon = cupones.find((c) => c.nombre === discountCode);
 
       if (cupon) {
-        setDiscount((totalPrice * cupon.descuento) / 100); // Calcula el descuento basado en el total de los productos
+        setDiscount((totalPrice * cupon.descuento) / 100);
         setErrors((prevErrors) => ({ ...prevErrors, discountCode: null }));
       } else {
         setDiscount(0);
-        setErrors((prevErrors) => ({ ...prevErrors, discountCode: 'El cupón no es válido o está congelado' }));
+        setErrors((prevErrors) => ({
+          ...prevErrors,
+          discountCode: 'El cupón no es válido o está congelado',
+        }));
       }
     } catch (error) {
       console.error('Error al validar el cupón:', error);
@@ -134,13 +162,14 @@ const CheckoutPage = () => {
     if (!validateForm()) {
       return;
     }
-  
+
     setIsLoading(true);
     const formData = new FormData();
     formData.append('nombre_completo', name);
     formData.append('numero_telefono', phone);
     formData.append('correo_electronico', email);
     formData.append('direccion', address);
+    formData.append('detalles_direccion', addressDetails);
     formData.append('productos', JSON.stringify(cartItems));
     formData.append('metodo_pago', paymentMethod);
     formData.append('costo_domicilio', deliveryCost);
@@ -152,16 +181,22 @@ const CheckoutPage = () => {
       formData.append('comprobante', receipt);
     }
     if (discountCode) {
-      formData.append('codigo_descuento', discountCode); // Enviar el código de descuento
+      formData.append('codigo_descuento', discountCode);
     }
-  
+
     try {
-      const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/pedido?establecimiento=${encodeURIComponent(establecimiento)}`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
+      const response = await axios.post(
+        `${process.env.REACT_APP_BACKEND_URL}/pedido?establecimiento=${encodeURIComponent(
+          establecimiento
+        )}`,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
         }
-      });
-  
+      );
+
       if (response.status === 201) {
         dispatch(clearCart());
         navigate(`/${establecimiento}/success`, { state: { name } });
@@ -174,15 +209,21 @@ const CheckoutPage = () => {
   };
 
   const handleCalculateDeliveryCost = async () => {
-    setCalculatingCost(true);
-    try {
-      const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/calcular_costo?establecimiento=${encodeURIComponent(establecimiento)}`, { destination: address });
-      setDeliveryCost(response.data.costo_domicilio);
-      setCalculatingCost(false);
-      setAddressConfirmed(true);
-    } catch (error) {
-      console.error('Error al calcular el costo del domicilio:', error);
-      setCalculatingCost(false);
+    if (address !== previousAddress) {
+      setCalculatingCost(true);
+      try {
+        const response = await axios.get(
+          `${process.env.REACT_APP_BACKEND_URL}/domicilio-price-noauth?establecimiento=${encodeURIComponent(
+            establecimiento
+          )}`
+        );
+        setDeliveryCost(response.data.price);
+        setPreviousAddress(address);
+      } catch (error) {
+        console.error('Error al obtener el costo del domicilio:', error);
+      } finally {
+        setCalculatingCost(false);
+      }
     }
   };
 
@@ -192,19 +233,22 @@ const CheckoutPage = () => {
 
   const fetchOrderDetails = async (phone) => {
     try {
-      const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/pedido/buscar`, {
-        params: { numero_telefono: phone }
-      });
+      const response = await axios.get(
+        `${process.env.REACT_APP_BACKEND_URL}/pedido/buscar`,
+        {
+          params: { numero_telefono: phone },
+        }
+      );
 
       if (response.status === 200) {
         const pedido = response.data;
         setFetchedOrder(pedido);
         setOpenDialog(true);
       } else {
-        console.log("No se encontraron pedidos para este número de teléfono");
+        console.log('No se encontraron pedidos para este número de teléfono');
       }
     } catch (error) {
-      console.error("Error al buscar pedidos:", error);
+      console.error('Error al buscar pedidos:', error);
     }
   };
 
@@ -215,7 +259,6 @@ const CheckoutPage = () => {
       setEmail(fetchedOrder.correo_electronico);
       setAddress(fetchedOrder.direccion);
       setPaymentMethod(fetchedOrder.metodo_pago);
-      setAddressConfirmed(false);
     }
   };
 
@@ -227,13 +270,16 @@ const CheckoutPage = () => {
 
   const handlePlaceSelected = (place) => {
     setAddress(place.formatted_address);
-    setAddressConfirmed(false);
   };
 
   useEffect(() => {
     const fetchEstablecimientoInfo = async () => {
       try {
-        const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/logo?establecimiento=${encodeURIComponent(establecimiento)}`);
+        const response = await axios.get(
+          `${process.env.REACT_APP_BACKEND_URL}/logo?establecimiento=${encodeURIComponent(
+            establecimiento
+          )}`
+        );
         const data = response.data;
         setAccountNumber(data.account_number);
         setQrCodeUrl(data.qr_code_url);
@@ -250,14 +296,25 @@ const CheckoutPage = () => {
   const [scheduleOrder, setScheduleOrder] = useState(false);
   const [deliveryDate, setDeliveryDate] = useState('');
   const [deliveryTimeRange, setDeliveryTimeRange] = useState('');
-  const [timeRanges] = useState(['10:00 - 12:00', '12:00 - 14:00', '14:00 - 16:00', '16:00 - 18:00']);
+  const [timeRanges] = useState([
+    '10:00 - 12:00',
+    '12:00 - 14:00',
+    '14:00 - 16:00',
+    '16:00 - 18:00',
+  ]);
 
   return (
-    <Paper elevation={0} sx={{ p: 4, maxWidth: 600, mx: 'auto', mt: 4, borderRadius: 2 }}>
+    <Paper
+      elevation={0}
+      sx={{ p: 4, maxWidth: 600, mx: 'auto', mt: 4, borderRadius: 2 }}
+    >
       <Typography variant="h5" sx={{ mb: 2 }}>
         Información del Pedido
       </Typography>
-      <Box component="form" sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+      <Box
+        component="form"
+        sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
+      >
         <TextField
           label="Número de Teléfono"
           variant="outlined"
@@ -285,7 +342,9 @@ const CheckoutPage = () => {
         {isLoaded && (
           <Autocomplete
             onLoad={(autocomplete) => setAutocomplete(autocomplete)}
-            onPlaceChanged={() => handlePlaceSelected(autocomplete.getPlace())}
+            onPlaceChanged={() =>
+              handlePlaceSelected(autocomplete.getPlace())
+            }
           >
             <div style={{ position: 'relative', width: '100%' }}>
               <TextField
@@ -293,21 +352,15 @@ const CheckoutPage = () => {
                 variant="outlined"
                 fullWidth
                 value={address}
-                onChange={(e) => {
-                  setAddress(e.target.value);
-                  setAddressConfirmed(false);
-                }}
+                onChange={(e) => setAddress(e.target.value)}
+                onBlur={handleCalculateDeliveryCost}
                 error={!!errors.address}
                 helperText={errors.address}
                 InputProps={{
                   endAdornment: (
                     <InputAdornment position="end">
-                      <IconButton
-                        onClick={handleCalculateDeliveryCost}
-                        disabled={!address || calculatingCost}
-                      >
-                        {addressConfirmed ? <CheckCircle color="success" /> : <CheckCircleOutline />}
-                      </IconButton>
+                      {calculatingCost && <CircularProgress size={20} />}
+                      {deliveryCost && !calculatingCost && <CheckCircle color="success" />}
                     </InputAdornment>
                   ),
                 }}
@@ -316,8 +369,19 @@ const CheckoutPage = () => {
             </div>
           </Autocomplete>
         )}
-        {calculatingCost && <CircularProgress size={20} sx={{ mt: 1 }} />}
-        {errors.deliveryCost && <Typography variant="body2" color="error">{errors.deliveryCost}</Typography>}
+        <TextField
+          label="Detalles de la Dirección"
+          variant="outlined"
+          fullWidth
+          value={addressDetails}
+          onChange={(e) => setAddressDetails(e.target.value)}
+          sx={{ mt: 2 }}
+        />
+        {errors.deliveryCost && (
+          <Typography variant="body2" color="error">
+            {errors.deliveryCost}
+          </Typography>
+        )}
         <FormControl variant="outlined" error={!!errors.paymentMethod}>
           <InputLabel>Método de Pago</InputLabel>
           <Select
@@ -327,31 +391,31 @@ const CheckoutPage = () => {
           >
             <MenuItem value="Transferencia">Transferencia</MenuItem>
           </Select>
-          {errors.paymentMethod && <Typography variant="body2" color="error">{errors.paymentMethod}</Typography>}
+          {errors.paymentMethod && (
+            <Typography variant="body2" color="error">
+              {errors.paymentMethod}
+            </Typography>
+          )}
         </FormControl>
         {paymentMethod === 'Transferencia' && (
           <Box sx={{ mt: 2, textAlign: 'center' }}>
             <Typography variant="h6" sx={{ mb: 1 }}>
               Realiza tu pago escaneando el código QR
             </Typography>
-            <img src={qrCodeUrl} alt="QR Code" style={{ width: 200, height: 200 }} />
+            <img
+              src={qrCodeUrl}
+              alt="QR Code"
+              style={{ width: 200, height: 200 }}
+            />
             <Typography variant="body1" sx={{ mt: 2 }}>
               Total a pagar: {formatCurrency(totalPrice + deliveryCost - discount)}
             </Typography>
             <Typography variant="body1">
               Número de cuenta: {accountNumber}
             </Typography>
-            <Button
-              variant="contained"
-              component="label"
-              sx={{ mt: 2 }}
-            >
+            <Button variant="contained" component="label" sx={{ mt: 2 }}>
               Cargar Comprobante
-              <input
-                type="file"
-                hidden
-                onChange={handleReceiptUpload}
-              />
+              <input type="file" hidden onChange={handleReceiptUpload} />
             </Button>
             <Typography variant="body2" sx={{ mt: 1 }}>
               {receipt ? receipt.name : 'Por favor, carga el comprobante de pago'}
@@ -407,7 +471,11 @@ const CheckoutPage = () => {
                   </MenuItem>
                 ))}
               </Select>
-              {errors.deliveryTimeRange && <Typography variant="body2" color="error">{errors.deliveryTimeRange}</Typography>}
+              {errors.deliveryTimeRange && (
+                <Typography variant="body2" color="error">
+                  {errors.deliveryTimeRange}
+                </Typography>
+              )}
             </FormControl>
           </Box>
         )}
@@ -417,38 +485,101 @@ const CheckoutPage = () => {
         </Typography>
         <Box sx={{ mb: 2 }}>
           {cartItems.map((item) => (
-            <Box key={item.id} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-              <Typography variant="body1">{item.quantity} x {item.name}</Typography>
-              <Typography variant="body1">{formatCurrency(item.price * item.quantity)}</Typography>
+            <Box
+              key={item.id}
+              sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                mb: 1,
+              }}
+            >
+              <Typography variant="body1">
+                {item.quantity} x {item.name}
+              </Typography>
+              <Typography variant="body1">
+                {formatCurrency(item.price * item.quantity)}
+              </Typography>
             </Box>
           ))}
           <Divider sx={{ my: 1 }} />
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              mb: 1,
+            }}
+          >
             <Typography variant="body1">Domicilio</Typography>
             <Typography variant="body1">{formatCurrency(deliveryCost)}</Typography>
           </Box>
           {discount > 0 && (
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                mb: 1,
+              }}
+            >
               <Typography variant="body1">Cupon</Typography>
               <Typography variant="body1">-{formatCurrency(discount)}</Typography>
             </Box>
           )}
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-            <Typography variant="body1" sx={{ fontWeight: 'bold', color: theme.palette.primary.main }}>Total</Typography>
-            <Typography variant="body1" sx={{ fontWeight: 'bold', color: theme.palette.primary.main }}>{formatCurrency(totalPrice + deliveryCost - discount)}</Typography>
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              mb: 1,
+            }}
+          >
+            <Typography
+              variant="body1"
+              sx={{ fontWeight: 'bold', color: theme.palette.primary.main }}
+            >
+              Total
+            </Typography>
+            <Typography
+              variant="body1"
+              sx={{ fontWeight: 'bold', color: theme.palette.primary.main }}
+            >
+              {formatCurrency(totalPrice + deliveryCost - discount)}
+            </Typography>
           </Box>
         </Box>
         <Button
           variant="contained"
-          sx={{ backgroundColor: theme.palette.primary.main, '&:hover': { backgroundColor: theme.palette.custom.hoover }, color: theme.palette.custom.light, borderRadius: '16px', mt: 2 }}
+          sx={{
+            backgroundColor: theme.palette.primary.main,
+            '&:hover': { backgroundColor: theme.palette.custom.hoover },
+            color: theme.palette.custom.light,
+            borderRadius: '16px',
+            mt: 2,
+          }}
           onClick={handleSubmit}
-          disabled={isLoading || (paymentMethod === 'Transferencia' && !receipt) || deliveryCost === null || deliveryCost === 0}
+          disabled={
+            isLoading ||
+            (paymentMethod === 'Transferencia' && !receipt) ||
+            deliveryCost === null ||
+            deliveryCost === 0
+          }
         >
           Confirmar Pedido
         </Button>
         <Button
           variant="outlined"
-          sx={{ borderColor: theme.palette.primary.main, color: theme.palette.primary.main, '&:hover': { borderColor: theme.palette.custom.hoover, color: theme.palette.custom.hoover }, borderRadius: '16px', mt: 1 }}
+          sx={{
+            borderColor: theme.palette.primary.main,
+            color: theme.palette.primary.main,
+            '&:hover': {
+              borderColor: theme.palette.custom.hoover,
+              color: theme.palette.custom.hoover,
+            },
+            borderRadius: '16px',
+            mt: 1,
+          }}
           onClick={handleContinueShopping}
         >
           Sigue Comprando
@@ -473,5 +604,3 @@ const CheckoutPage = () => {
 };
 
 export default CheckoutPage;
-
-
