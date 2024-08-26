@@ -21,7 +21,7 @@ const Footer = () => {
   };
 
   const handleZeendrLogoClick = () => {
-    window.open('https://storage.googleapis.com/comprobantes-madriguera/irre-logo.png', '_blank');
+    window.open('https://www.irrelevant-club.com/', '_blank');
   };
 
   const toTitleCase = (str) => {

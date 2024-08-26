@@ -66,12 +66,32 @@ function App() {
       <Provider store={store}>
         <Router>
           <Routes>
+            <Route path="/" element={<HomeRedirect />} />
             <Route path="/:establecimiento/*" element={<MainRoutes updateTheme={updateTheme} />} />
           </Routes>
         </Router>
       </Provider>
     </ThemeProvider>
   );
+}
+
+function HomeRedirect() {
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+      window.location.href = "https://www.irrelevant-club.com/";
+    }, 3000); // 3 segundos de transición con el Loader
+
+    return () => clearTimeout(timer); // Limpiar el temporizador si el componente se desmonta
+  }, []);
+
+  if (loading) {
+    return <Loader />;
+  }
+
+  return null; // No mostrar nada una vez que la redirección haya comenzado
 }
 
 function MainRoutes({ updateTheme }) {
@@ -133,7 +153,7 @@ function MainRoutes({ updateTheme }) {
   }, [establecimiento, navigate]);
 
   useEffect(() => {
-    const minimumLoadingTime = 3000; // 5 segundos
+    const minimumLoadingTime = 3000; // 3 segundos
     const startTime = Date.now();
 
     const timer = setTimeout(() => {
@@ -261,4 +281,3 @@ function EstablecimientoWrapper() {
 }
 
 export default App;
-
