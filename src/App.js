@@ -12,6 +12,10 @@ import ClosedMessage from './screens/ClosedMessage/ClosedMessage';
 import { Provider } from 'react-redux';
 import store from './redux/store';
 import Loader from './components/Loader/Loader';
+import PaymentSuccess from './screens/PasarelaScreens/PaymentSuccess'; 
+import FailurePage from './screens/PasarelaScreens/FailurePage';
+import PendingPage from './screens/PasarelaScreens/PendingPage';
+
 
 const EstablecimientoContext = createContext();
 
@@ -276,8 +280,13 @@ function EstablecimientoWrapper() {
       <Route path="checkout" element={<CheckoutPage />} />
       <Route path="success" element={<SuccessPage />} />
       <Route path="about" element={<AboutPage />} />
+      <Route path="ok" element={<PaymentSuccess />} />
+      <Route path="failure" element={<FailurePage />} />
+      <Route path="pending" element={<PendingPage />} />
     </Routes>
   );
 }
 
 export default App;
+
+
