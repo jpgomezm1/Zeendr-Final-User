@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Box, Typography, Button, Grid, Card, CardMedia, CardContent, useTheme, useMediaQuery } from '@mui/material';
 import { styled } from '@mui/material/styles';
+import LazyLoad from 'react-lazyload';
 import ProductModal from '../../components/ProductModal/ProductModal';
 import Header from '../../components/Header/Header';
 import CartSummary, { selectTotalItems } from '../../components/CartSummary/CartSummary';
@@ -10,6 +11,7 @@ import OffersSection from './OffersSection';
 import { useSelector } from 'react-redux';
 import { useEstablecimiento } from '../../App';
 import { useNavigate } from 'react-router-dom';
+import Placeholder from '../../components/Placeholder/Placeholder';
 
 const CategoryButton = styled(Button)(({ theme }) => ({
   color: theme.palette.custom.dark,
@@ -43,7 +45,6 @@ function ProductsPage() {
   const totalItems = useSelector(selectTotalItems);
   const navigate = useNavigate();
 
-  // Llamada para obtener los productos
   useEffect(() => {
     axios.get(`${process.env.REACT_APP_BACKEND_URL}/productos/disponibles?establecimiento=${encodeURIComponent(establecimiento)}`)
       .then(response => {
@@ -52,21 +53,17 @@ function ProductsPage() {
       .catch(error => console.error('Error fetching products:', error));
   }, [establecimiento]);
 
-  // Llamada para obtener las categorías ordenadas del backend
   useEffect(() => {
     axios.get(`${process.env.REACT_APP_BACKEND_URL}/categorias/disponibles`)
       .then(response => {
         const orderedCategories = response.data.map(categoria => categoria.nombre);
-        
-        // Filtros para categorías con productos asociados
         const categoriesWithProducts = orderedCategories.filter(category => 
           products.some(product => product.categoria === category)
         );
-        
         setCategories(['Todos', ...categoriesWithProducts]);
       })
       .catch(error => console.error('Error fetching categories:', error));
-  }, [products]);  // Dependencia de productos para esperar que los productos estén cargados
+  }, [products]);
 
   useEffect(() => {
     const bannerInterval = setInterval(() => {
@@ -117,7 +114,14 @@ function ProductsPage() {
                     {product.descuento}% OFF
                   </Box>
                 )}
-                <CardMedia component="img" image={product.imagen_url} alt={product.nombre} sx={{ position: 'absolute', width: '100%', height: '100%', objectFit: 'cover' }} />
+                <LazyLoad height={300} offset={100} placeholder={<Placeholder />}>
+                  <CardMedia 
+                    component="img" 
+                    image={product.imagen_url} 
+                    alt={product.nombre} 
+                    sx={{ position: 'absolute', width: '100%', height: '100%', objectFit: 'cover' }} 
+                  />
+                </LazyLoad>
                 <CardContent sx={{ mt: 'auto', width: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', color: 'white', padding: 2, position: 'absolute', bottom: 0 }}>
                   <Typography variant="h6" component="div">
                     {product.nombre}
@@ -174,5 +178,4 @@ function ProductsPage() {
 }
 
 export default ProductsPage;
-
 
