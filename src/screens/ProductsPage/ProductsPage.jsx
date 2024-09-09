@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
 import { Box, Typography, Button, Grid, Card, CardMedia, CardContent, useTheme, useMediaQuery } from '@mui/material';
 import { styled } from '@mui/material/styles';
@@ -95,18 +95,23 @@ function ProductsPage() {
     }).format(value);
   };
 
-  const renderCategorySection = (category) => {
-    const filteredProducts = products
-      .filter(product => category === 'Todos' || product.categoria === category)
+  // Memoized filtered products
+  const filteredProducts = useMemo(() => {
+    return products
+      .filter(product => selectedCategory === 'Todos' || product.categoria === selectedCategory)
       .filter(product => product.nombre.toLowerCase().includes(searchTerm.toLowerCase()));
-      
+  }, [products, selectedCategory, searchTerm]);
+
+  const renderCategorySection = (category) => {
+    const categoryProducts = filteredProducts.filter(product => category === 'Todos' || product.categoria === category);
+    
     return (
       <Box key={category}>
         <Typography variant="h4" sx={{ mt: 4, mb: 2, color: theme.palette.custom.dark, fontWeight: 'bold' }}>
           {category}
         </Typography>
         <Grid container spacing={2}>
-          {filteredProducts.map(product => (
+          {categoryProducts.map(product => (
             <Grid item xs={6} sm={4} md={3} lg={3} key={product.id} onClick={() => handleOpenModal(product)}>
               <Card sx={{ display: 'flex', flexDirection: 'column', height: { xs: 250, md: 300, lg: 350 }, position: 'relative', overflow: 'hidden', transition: 'transform 0.3s, box-shadow 0.3s', '&:hover': { transform: 'scale(1.05)', boxShadow: '0 4px 20px rgba(0, 0, 0, 0.2)', cursor: 'pointer' } }}>
                 {product.descuento > 0 && (
@@ -178,4 +183,3 @@ function ProductsPage() {
 }
 
 export default ProductsPage;
-
