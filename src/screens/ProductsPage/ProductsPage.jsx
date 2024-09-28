@@ -43,31 +43,39 @@ function ProductsPage() {
   const totalItems = useSelector(selectTotalItems);
   const navigate = useNavigate();
 
-  // Llamada para obtener los productos
+  // Llamada para obtener los productos y las categorías
   useEffect(() => {
-    axios.get(`${process.env.REACT_APP_BACKEND_URL}/productos/disponibles?establecimiento=${encodeURIComponent(establecimiento)}`)
-      .then(response => {
-        setProducts(response.data);
-      })
-      .catch(error => console.error('Error fetching products:', error));
+    const fetchProductsAndCategories = async () => {
+      try {
+        const [productsResponse, categoriesResponse] = await Promise.all([
+          axios.get(`${process.env.REACT_APP_BACKEND_URL}/productos/disponibles?establecimiento=${encodeURIComponent(establecimiento)}`),
+          axios.get(`${process.env.REACT_APP_BACKEND_URL}/categorias/disponibles`)
+        ]);
+
+        const productsData = productsResponse.data;
+        setProducts(productsData);
+
+        // Aseguramos que las categorías sean únicas
+        const orderedCategories = [...new Set(categoriesResponse.data.map(categoria => categoria.nombre))];
+
+        // Filtros para categorías con productos asociados y eliminamos duplicados
+        const categoriesWithProducts = [...new Set(
+          orderedCategories.filter(category =>
+            productsData.some(product => product.categoria === category)
+          )
+        )];
+
+        setCategories(['Todos', ...categoriesWithProducts]);
+
+      } catch (error) {
+        console.error('Error fetching products and categories:', error);
+      }
+    };
+
+    fetchProductsAndCategories();
   }, [establecimiento]);
 
-  // Llamada para obtener las categorías ordenadas del backend
-  useEffect(() => {
-    axios.get(`${process.env.REACT_APP_BACKEND_URL}/categorias/disponibles`)
-      .then(response => {
-        const orderedCategories = response.data.map(categoria => categoria.nombre);
-        
-        // Filtros para categorías con productos asociados
-        const categoriesWithProducts = orderedCategories.filter(category => 
-          products.some(product => product.categoria === category)
-        );
-        
-        setCategories(['Todos', ...categoriesWithProducts]);
-      })
-      .catch(error => console.error('Error fetching categories:', error));
-  }, [products]);  // Dependencia de productos para esperar que los productos estén cargados
-
+  // Rotación de banners
   useEffect(() => {
     const bannerInterval = setInterval(() => {
       setCurrentBanner(prevBanner => (prevBanner + 1) % bannerUrls.length);
@@ -102,7 +110,7 @@ function ProductsPage() {
     const filteredProducts = products
       .filter(product => category === 'Todos' || product.categoria === category)
       .filter(product => product.nombre.toLowerCase().includes(searchTerm.toLowerCase()));
-      
+
     return (
       <Box key={category}>
         <Typography variant="h4" sx={{ mt: 4, mb: 2, color: theme.palette.custom.dark, fontWeight: 'bold' }}>
@@ -111,14 +119,53 @@ function ProductsPage() {
         <Grid container spacing={2}>
           {filteredProducts.map(product => (
             <Grid item xs={6} sm={4} md={3} lg={3} key={product.id} onClick={() => handleOpenModal(product)}>
-              <Card sx={{ display: 'flex', flexDirection: 'column', height: { xs: 250, md: 300, lg: 350 }, position: 'relative', overflow: 'hidden', transition: 'transform 0.3s, box-shadow 0.3s', '&:hover': { transform: 'scale(1.05)', boxShadow: '0 4px 20px rgba(0, 0, 0, 0.2)', cursor: 'pointer' } }}>
+              <Card sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                height: { xs: 250, md: 300, lg: 350 },
+                position: 'relative',
+                overflow: 'hidden',
+                transition: 'transform 0.3s, box-shadow 0.3s',
+                '&:hover': {
+                  transform: 'scale(1.05)',
+                  boxShadow: '0 4px 20px rgba(0, 0, 0, 0.2)',
+                  cursor: 'pointer'
+                }
+              }}>
                 {product.descuento > 0 && (
-                  <Box sx={{ position: 'absolute', top: 10, left: 10, backgroundColor: 'red', color: 'white', padding: '5px 10px', borderRadius: '10px', zIndex: 1 }}>
+                  <Box sx={{
+                    position: 'absolute',
+                    top: 10,
+                    left: 10,
+                    backgroundColor: 'red',
+                    color: 'white',
+                    padding: '5px 10px',
+                    borderRadius: '10px',
+                    zIndex: 1
+                  }}>
                     {product.descuento}% OFF
                   </Box>
                 )}
-                <CardMedia component="img" image={product.imagen_url} alt={product.nombre} sx={{ position: 'absolute', width: '100%', height: '100%', objectFit: 'cover' }} />
-                <CardContent sx={{ mt: 'auto', width: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', color: 'white', padding: 2, position: 'absolute', bottom: 0 }}>
+                <CardMedia
+                  component="img"
+                  image={product.imagen_url}
+                  alt={product.nombre}
+                  sx={{
+                    position: 'absolute',
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover'
+                  }}
+                />
+                <CardContent sx={{
+                  mt: 'auto',
+                  width: '100%',
+                  backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                  color: 'white',
+                  padding: 2,
+                  position: 'absolute',
+                  bottom: 0
+                }}>
                   <Typography variant="h6" component="div">
                     {product.nombre}
                   </Typography>
@@ -150,20 +197,41 @@ function ProductsPage() {
   };
 
   return (
-    <Box sx={{ pt: isLargeScreen ? '120px' : '0', p: 2, pb: totalItems > 0 ? (isLargeScreen ? '170px' : '130px') : 2, maxWidth: { xs: '100%', md: '80%' }, mx: 'auto' }}>
+    <Box sx={{
+      pt: isLargeScreen ? '120px' : '0',
+      p: 2,
+      pb: totalItems > 0 ? (isLargeScreen ? '170px' : '130px') : 2,
+      maxWidth: { xs: '100%', md: '80%' },
+      mx: 'auto'
+    }}>
       <Header logo={logoUrl} searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
       <Box sx={{ my: 2 }}>
         <img src={bannerUrls[currentBanner]} alt="Special Offer" style={{ width: '100%', borderRadius: '10px' }} />
       </Box>
       <Box sx={{ overflowX: 'auto', whiteSpace: 'nowrap', mb: 1 }}>
         {categories.map((category, index) => (
-          <CategoryButton key={index} variant="outlined" sx={{ backgroundColor: theme.palette.primary.main, fontWeight: 'bold', color: theme.palette.custom.light, display: 'inline-block', marginRight: isLargeScreen ? '16px' : '8px', fontSize: isLargeScreen ? '1.25rem' : '1rem', padding: isLargeScreen ? '10px 20px' : '6px 12px' }} onClick={() => handleCategoryClick(category)}>
+          <CategoryButton
+            key={index}
+            variant="outlined"
+            sx={{
+              backgroundColor: theme.palette.primary.main,
+              fontWeight: 'bold',
+              color: theme.palette.custom.light,
+              display: 'inline-block',
+              marginRight: isLargeScreen ? '16px' : '8px',
+              fontSize: isLargeScreen ? '1.25rem' : '1rem',
+              padding: isLargeScreen ? '10px 20px' : '6px 12px'
+            }}
+            onClick={() => handleCategoryClick(category)}
+          >
             {category}
-          </CategoryButton >
+          </CategoryButton>
         ))}
       </Box>
       <OffersSection products={products} handleOpenModal={handleOpenModal} />
-      {selectedCategory === 'Todos' ? categories.filter(c => c !== 'Todos').map(renderCategorySection) : renderCategorySection(selectedCategory)}
+      {selectedCategory === 'Todos'
+        ? categories.filter(c => c !== 'Todos').map(renderCategorySection)
+        : renderCategorySection(selectedCategory)}
       {selectedProduct && (
         <ProductModal product={selectedProduct} open={openModal} onClose={handleCloseModal} />
       )}
