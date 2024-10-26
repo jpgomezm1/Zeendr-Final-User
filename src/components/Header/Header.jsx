@@ -23,7 +23,7 @@ function Header({ logo, searchTerm, setSearchTerm }) {
     <Box>
       <Box
         sx={{
-          backgroundColor: '#FFA726', // Fondo naranja para el texto animado
+          backgroundColor: '#000000', // Fondo naranja para el texto animado
           overflow: 'hidden',
           whiteSpace: 'nowrap',
           p: 1,
