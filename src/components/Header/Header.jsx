@@ -51,7 +51,7 @@ function Header({ logo, searchTerm, setSearchTerm }) {
                 fontWeight: 'bold'
               }}
             >
-              {establecimiento.toUpperCase()} — ¡PIDE A LA PUERTA DE TU CASA! — SÍGUENOS EN REDES 
+              {establecimiento.toUpperCase()} — ¡CONOCE NUESTRA MARCA! — SÍGUENOS EN REDES 
             </Typography>
           ))}
         </Box>

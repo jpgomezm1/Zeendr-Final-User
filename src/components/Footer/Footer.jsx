@@ -70,14 +70,12 @@ const Footer = () => {
           </Box>
         </Grid>
         <Grid item xs={12} md={3}>
-        <Typography variant="h6" sx={{  fontSize: { xs: '1.2rem', md: '1.5rem' }, color: '#333' }}>
-            Developed by
-          </Typography>
+
           <Box sx={{ cursor: 'pointer', display: 'flex', justifyContent: 'center' }} onClick={handleZeendrLogoClick}>
             <img
-              src="https://storage.googleapis.com/comprobantes-madriguera/irre-logo.png"
+              src="https://storage.googleapis.com/comprobantes-madriguera/multimediaFeria/devby.png"
               alt="Logo Zeendr"
-              style={{ width: '250px', transition: 'transform 0.3s' }}
+              style={{ width: '200px', transition: 'transform 0.3s' }}
               onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
               onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1.0)'}
             />
