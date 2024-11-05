@@ -100,7 +100,7 @@ function ProductModal({ product, open, onClose }) {
                 {formatCurrency(product.precio)}
               </Typography>
             )}
-            {/* <Typography variant="overline" display="block" sx={{ mb: 1, fontWeight: 'bold' }}>
+            <Typography variant="overline" display="block" sx={{ mb: 1, fontWeight: 'bold' }}>
               Descripción
             </Typography>
             <Typography sx={{ mb: 2 }}>
@@ -142,7 +142,7 @@ function ProductModal({ product, open, onClose }) {
               multiline
               rows={3}
               placeholder="Agrega un comentario sobre tu pedido"
-            /> */}
+            />
           </Box>
         </Box>
       </Box>
